@@ -53,6 +53,7 @@ static bool: redm_equip_manager
 static redm_keep_weapon_slot
 static bool: redm_open_equip_menu
 static bool: redm_equip_menu_open_by_g
+static bool: redm_give_grenades
 
 
 EquipManager_Init() {
@@ -100,6 +101,16 @@ EquipManager_Init() {
             .description = "Open equip menu by pressing `G` (drop command)."
         ),
         redm_equip_menu_open_by_g
+    )
+    bind_pcvar_num(
+        create_cvar(
+            "redm_give_grenades", "1",
+            .has_min = true, .min_val = 0.0,
+            .has_max = true, .max_val = 1.0,
+            .flags = _FCVAR_BOOLEAN,
+            .description = "Give 1 HE grenade + 1 flashbang + 1 smoke grenade on every spawn."
+        ),
+        redm_give_grenades
     )
 
     register_concmd(
@@ -493,7 +504,8 @@ public CBasePlayer_OnSpawnEquip_Post(const player, bool: addDefault, bool: equip
 
     // Always give grenades on every spawn regardless of weapon-menu selection.
     // GT_REPLACE normalises the count to exactly 1 of each type.
-    Player_GiveSpawnGrenades(player)
+    if (redm_give_grenades)
+        Player_GiveSpawnGrenades(player)
 
     if (hasConfiguredEquip)
         return
