@@ -24,6 +24,11 @@ enum {
     EQUIP_NOT_CHOOSEN = -1, /**< Represents an invalid or unset equipment choice. */
 }
 
+enum {
+    TASK_GIVE_FLASHBANG    = 100, /**< Task ID offset for deferred flashbang give. */
+    TASK_GIVE_SMOKEGRENADE = 200, /**< Task ID offset for deferred smoke grenade give. */
+}
+
 /**
  * Arrays to store player equipment choices.
  */
@@ -641,16 +646,18 @@ static bool: Player_GiveWeapon(const player, const EquipType_e: section) {
  */
 static Player_GiveSpawnGrenades(const player) {
     rg_give_item(player, "weapon_hegrenade", GT_REPLACE)
-    set_task(0.1, "GiveFlashbang", player)
-    set_task(0.2, "GiveSmokegrenade", player)
+    set_task(0.1, "GiveFlashbang", player + TASK_GIVE_FLASHBANG)
+    set_task(0.2, "GiveSmokegrenade", player + TASK_GIVE_SMOKEGRENADE)
 }
 
-public GiveFlashbang(const player) {
+public GiveFlashbang(const taskId) {
+    new player = taskId - TASK_GIVE_FLASHBANG
     if (is_user_alive(player))
         rg_give_item(player, "weapon_flashbang", GT_REPLACE)
 }
 
-public GiveSmokegrenade(const player) {
+public GiveSmokegrenade(const taskId) {
+    new player = taskId - TASK_GIVE_SMOKEGRENADE
     if (is_user_alive(player))
         rg_give_item(player, "weapon_smokegrenade", GT_REPLACE)
 }
