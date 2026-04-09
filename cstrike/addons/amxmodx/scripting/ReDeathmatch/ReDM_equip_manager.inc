@@ -4,6 +4,7 @@
 enum EquipType_e {
     et_Primary,     /**< Primary equipment. */
     et_Secondary,   /**< Secondary equipment. */
+    et_Grenades,    /**< Grenade equipment. */
 }
 
 /**
@@ -11,7 +12,8 @@ enum EquipType_e {
  */
 static const g_equipSections[EquipType_e][] = {
     "primary",
-    "secondary"
+    "secondary",
+    "grenades"
 }
 
 /**
@@ -349,8 +351,14 @@ static bool: Player_CallEquipMenu(const player) {
 static Menu_ChooseEquip(const player, const EquipType_e: section) {
     SetGlobalTransTarget(player)
 
+    static const sectionMenuTitleKeys[EquipType_e][] = {
+        "PrimaryEquip",
+        "SecondaryEquip",
+        "GrenadeEquip"
+    }
+
     new menuTitle[128]
-    formatex(menuTitle, charsmax(menuTitle), "%l", section == et_Primary ? "PrimaryEquip" : "SecondaryEquip")
+    formatex(menuTitle, charsmax(menuTitle), "%l", sectionMenuTitleKeys[section])
 
     if (redm_equip_menu_open_by_g)
         strcat(menuTitle, fmt("^n%l", "ToClosePressG"), charsmax(menuTitle))
@@ -507,9 +515,8 @@ public CBasePlayer_OnSpawnEquip_Post(const player, bool: addDefault, bool: equip
         Player_GiveWeapon(player, section)
     }
 
-    // Always give grenades on every spawn regardless of weapon-menu selection.
-    // GT_REPLACE normalises the count to exactly 1 of each type.
-    if (redm_give_grenades)
+    // Auto-give grenades only when no grenade equip section is configured.
+    if (redm_give_grenades && !HasEquipItems(player, et_Grenades))
         Player_GiveSpawnGrenades(player)
 
     if (hasConfiguredEquip)
@@ -518,9 +525,12 @@ public CBasePlayer_OnSpawnEquip_Post(const player, bool: addDefault, bool: equip
     // TODO: smells like a shit. need to rework later
     if (!hasConfiguredEquip && redm_open_equip_menu) {
         if (!g_inEquipMenu[player]) {
-            new EquipType_e: section = (g_playerWeapons[player][et_Primary] == EQUIP_NOT_CHOOSEN) ? et_Primary : et_Secondary
-
-            Menu_ChooseEquip(player, section)
+            for (new EquipType_e: section; section < EquipType_e; section++) {
+                if (HasEquipItems(player, section) && g_playerWeapons[player][section] == EQUIP_NOT_CHOOSEN) {
+                    Menu_ChooseEquip(player, section)
+                    break
+                }
+            }
         }
     }
 }
@@ -646,6 +656,8 @@ static bool: Player_GiveWeapon(const player, const EquipType_e: section) {
  */
 static Player_GiveSpawnGrenades(const player) {
     rg_give_item(player, "weapon_hegrenade", GT_REPLACE)
+    // Stagger gives across frames so the CS 1.6 client HUD registers each
+    // grenade pickup separately and displays all three correctly.
     set_task(0.1, "GiveFlashbang", player + TASK_GIVE_FLASHBANG)
     set_task(0.2, "GiveSmokegrenade", player + TASK_GIVE_SMOKEGRENADE)
 }
