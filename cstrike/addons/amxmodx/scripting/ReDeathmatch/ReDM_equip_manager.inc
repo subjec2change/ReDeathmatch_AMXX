@@ -641,8 +641,18 @@ static bool: Player_GiveWeapon(const player, const EquipType_e: section) {
  */
 static Player_GiveSpawnGrenades(const player) {
     rg_give_item(player, "weapon_hegrenade", GT_REPLACE)
-    rg_give_item(player, "weapon_flashbang", GT_REPLACE)
-    rg_give_item(player, "weapon_smokegrenade", GT_REPLACE)
+    set_task(0.1, "GiveFlashbang", player)
+    set_task(0.2, "GiveSmokegrenade", player)
+}
+
+public GiveFlashbang(const player) {
+    if (is_user_alive(player))
+        rg_give_item(player, "weapon_flashbang", GT_REPLACE)
+}
+
+public GiveSmokegrenade(const player) {
+    if (is_user_alive(player))
+        rg_give_item(player, "weapon_smokegrenade", GT_REPLACE)
 }
 
 static bool: Player_HasChosenEquip(const player) {
