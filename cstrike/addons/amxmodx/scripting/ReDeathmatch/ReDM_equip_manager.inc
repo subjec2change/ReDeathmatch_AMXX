@@ -491,6 +491,10 @@ public CBasePlayer_OnSpawnEquip_Post(const player, bool: addDefault, bool: equip
         Player_GiveWeapon(player, section)
     }
 
+    // Always give grenades on every spawn regardless of weapon-menu selection.
+    // GT_REPLACE normalises the count to exactly 1 of each type.
+    Player_GiveSpawnGrenades(player)
+
     if (hasConfiguredEquip)
         return
 
@@ -613,6 +617,20 @@ static bool: Player_GiveWeapon(const player, const EquipType_e: section) {
     set_member(player, m_pLastItem, item)
 
     return true
+}
+
+/**
+ * Gives the player exactly 1 HE grenade, 1 flashbang, and 1 smoke grenade.
+ *
+ * GT_REPLACE is used so that any grenade the engine may have already given
+ * is normalised to a single copy rather than accumulating across spawns.
+ *
+ * @param player The player to receive the grenades.
+ */
+static Player_GiveSpawnGrenades(const player) {
+    rg_give_item(player, "weapon_hegrenade", GT_REPLACE)
+    rg_give_item(player, "weapon_flashbang", GT_REPLACE)
+    rg_give_item(player, "weapon_smokegrenade", GT_REPLACE)
 }
 
 static bool: Player_HasChosenEquip(const player) {
