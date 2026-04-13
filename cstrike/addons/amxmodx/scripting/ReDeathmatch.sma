@@ -132,6 +132,8 @@ public client_disconnected(player, bool: drop, message[], maxLen) {
         return
 
     ModeVote_Disconnected(player)
+    remove_task(player + TASK_GIVE_FLASHBANG)
+    remove_task(player + TASK_GIVE_SMOKEGRENADE)
 }
 
 public RoundEnd_Post(WinStatus: status, ScenarioEventEndRound: event, Float: tmDelay) {

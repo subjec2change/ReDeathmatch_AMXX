@@ -28,6 +28,11 @@
             "weapon_elite",
             "weapon_fiveseven"
         ],
+        "grenades": [
+            "weapon_hegrenade",
+            "weapon_flashbang",
+            "weapon_smokegrenade"
+        ],
         "botEquip": {
             "primary": [
                 "weapon_famas",
